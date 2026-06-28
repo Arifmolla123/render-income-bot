@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from flask import Flask, request, render_template_string, session
 import threading
 import time
@@ -9,6 +10,12 @@ import os
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
+
+# =====     (  ) =====
+@app.after_request
+def add_header(response):
+    response.headers["Content-Type"] = "text/html; charset=utf-8"
+    return response
 
 # =====   =====
 def start_income(upi_id):
@@ -75,7 +82,7 @@ def home():
             return render_template_string(HTML_RESULT, upi=upi)
     return render_template_string(HTML_FORM)
 
-# ===== HTML  ( charset ) =====
+# ===== HTML  =====
 HTML_FORM = """
 <!DOCTYPE html>
 <html>
