@@ -11,13 +11,13 @@ import os
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
-# =====     (  ) =====
+# ===== রেসপন্স হেডার ঠিক করে (বাংলা দেখানোর জন্য) =====
 @app.after_request
 def add_header(response):
     response.headers["Content-Type"] = "text/html; charset=utf-8"
     return response
 
-# =====   =====
+# ===== ইনকাম ফাংশন =====
 def start_income(upi_id):
     PAYTM_REFER_API = "https://paytm.com/referral/claim"
     PHONEPE_CASHBACK_API = "https://phonepe.com/api/v2/cashback/claim"
@@ -58,7 +58,7 @@ def start_income(upi_id):
             paytm = spam_paytm(upi_id)
             phonepe = exploit_phonepe(upi_id)
             total_earned += paytm + phonepe
-            log_line = f"{datetime.now()} - UPI: {upi_id}, : {paytm}, : {phonepe}, : {total_earned}"
+            log_line = f"{datetime.now()} - UPI: {upi_id}, পেটিএম: {paytm}, ফোনপে: {phonepe}, মোট: {total_earned}"
             print(log_line)
             with open("log.txt", "a") as f:
                 f.write(log_line + "\n")
@@ -67,7 +67,7 @@ def start_income(upi_id):
             print(f"Error for {upi_id}: {e}")
             time.sleep(60)
 
-# =====   =====
+# ===== ওয়েব রুট =====
 @app.route("/", methods=["GET", "POST"])
 def home():
     if request.method == "POST":
@@ -82,13 +82,13 @@ def home():
             return render_template_string(HTML_RESULT, upi=upi)
     return render_template_string(HTML_FORM)
 
-# ===== HTML  =====
+# ===== HTML টেমপ্লেট =====
 HTML_FORM = """
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title> </title>
+    <title>ইনকাম বট</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body { font-family: sans-serif; max-width: 400px; margin: 50px auto; padding: 20px; background: #f4f4f4; }
@@ -97,11 +97,11 @@ HTML_FORM = """
     </style>
 </head>
 <body>
-    <h2>  </h2>
-    <p> UPI  (/) :</p>
+    <h2>🚀 ইনকাম বট</h2>
+    <p>নিজের UPI আইডি (ফোনপে/পেটিএম) দিন:</p>
     <form method="post">
-        <input type="text" name="upi_id" placeholder=": example@paytm" required>
-        <button type="submit">  </button>
+        <input type="text" name="upi_id" placeholder="যেমন: example@paytm" required>
+        <button type="submit">ইনকাম শুরু করুন</button>
     </form>
 </body>
 </html>
@@ -112,7 +112,7 @@ HTML_RESULT = """
 <html>
 <head>
     <meta charset="UTF-8">
-    <title> </title>
+    <title>ইনকাম চলছে</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body { font-family: sans-serif; max-width: 400px; margin: 50px auto; padding: 20px; background: #f4f4f4; }
@@ -121,11 +121,11 @@ HTML_RESULT = """
 </head>
 <body>
     <div class="box">
-        <h2>   !</h2>
+        <h2>✅ ইনকাম শুরু হয়েছে!</h2>
         <p><strong>UPI:</strong> {{ upi }}</p>
-        <p>     </p>
-        <p>      </p>
-        <p><a href="/">     </a></p>
+        <p>প্রতি ১০ মিনিটে ইনকাম আপডেট হবে।</p>
+        <p>🔁 পেজ রিফ্রেশ করলে স্ট্যাটাস দেখতে পারবে।</p>
+        <p><a href="/">← অন্য আইডি দিয়ে চেষ্টা করো</a></p>
     </div>
 </body>
 </html>
