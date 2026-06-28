@@ -5,9 +5,10 @@ import requests
 import random
 import hashlib
 from datetime import datetime
+import os
 
 app = Flask(__name__)
-app.secret_key = "supersecretkey"  #  
+app.secret_key = "supersecretkey"
 
 # =====   =====
 def start_income(upi_id):
@@ -74,11 +75,12 @@ def home():
             return render_template_string(HTML_RESULT, upi=upi)
     return render_template_string(HTML_FORM)
 
-# ===== HTML  =====
+# ===== HTML  ( charset ) =====
 HTML_FORM = """
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title> </title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
@@ -102,6 +104,7 @@ HTML_RESULT = """
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title> </title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
@@ -122,4 +125,5 @@ HTML_RESULT = """
 """
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
