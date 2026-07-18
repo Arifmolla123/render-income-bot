@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WealthVault � Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <title>WealthVault – Dashboard</title>
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; }
         body { background:#0b0e1a; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:16px; }
-        .app { max-width:420px; width:100%; background:#13172a; border-radius:40px; padding:20px 18px 10px; border:1px solid #2a2f4a; box-shadow:0 20px 60px rgba(0,0,0,0.6); position:relative; padding-bottom:80px; }
+        .app { max-width:420px; width:100%; background:#13172a; border-radius:40px; padding:20px 18px 30px; border:1px solid #2a2f4a; box-shadow:0 20px 60px rgba(0,0,0,0.6); padding-bottom:80px; }
         /* Top Nav */
         .nav { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
         .nav-left { display:flex; align-items:center; gap:12px; }
@@ -90,75 +89,75 @@
     <div class="nav">
         <div class="nav-left">
             <div class="avatar" id="avatarLetter">W</div>
-            <div class="nav-title"> <span>Wealth</span>Vault</div>
+            <div class="nav-title">💎 <span>Wealth</span>Vault</div>
         </div>
         <div class="nav-right">
-            <span class="nav-icon" onclick="logout()" style="cursor:pointer;"></span>
+            <span class="nav-icon" onclick="logout()" style="cursor:pointer;">🚪</span>
         </div>
     </div>
 
-    <div class="welcome"> Welcome, <strong id="userName">User</strong>!</div>
+    <div class="welcome">👋 Welcome, <strong id="userName">User</strong>!</div>
 
     <div class="balance-card">
-        <div class="balance-label"> Wallet Balance</div>
-        <div class="balance-amount"><span class="currency"></span><span id="balance">0.00</span></div>
+        <div class="balance-label">💰 Wallet Balance</div>
+        <div class="balance-amount"><span class="currency">₹</span><span id="balance">0.00</span></div>
         <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
         <div class="row-stats">
-            <span>Daily Return: <strong id="dailyReturn">0</strong> /day</span>
-            <span>Target: <strong>2,100</strong></span>
+            <span>Daily Return: <strong id="dailyReturn">0</strong> ₹/day</span>
+            <span>Target: <strong>₹2,100</strong></span>
         </div>
-        <div class="min-withdraw"> Minimum Withdrawal: <strong>2,100</strong></div>
+        <div class="min-withdraw">🔑 Minimum Withdrawal: <strong>₹2,100</strong></div>
         <div class="withdraw-inline">
-            <button class="btn-withdraw-inline" id="withdrawBtn" disabled onclick="initWithdraw()"> Withdraw Now</button>
-            <div class="withdraw-hint" id="withdrawHint">Requires 2,100 balance</div>
+            <button class="btn-withdraw-inline" id="withdrawBtn" disabled onclick="initWithdraw()">💸 Withdraw Now</button>
+            <div class="withdraw-hint" id="withdrawHint">Requires ₹2,100 balance</div>
         </div>
     </div>
 
     <div class="stats-grid">
-        <div class="stat-card"><div class="label"> Total Invested</div><div class="value" id="totalInvested">0</div></div>
-        <div class="stat-card"><div class="label"> Total Earnings</div><div class="value gold" id="totalEarnings">0</div></div>
+        <div class="stat-card"><div class="label">💰 Total Invested</div><div class="value" id="totalInvested">₹0</div></div>
+        <div class="stat-card"><div class="label">📈 Total Earnings</div><div class="value gold" id="totalEarnings">₹0</div></div>
     </div>
 
-    <div class="section-title"> Invest Packs</div>
+    <div class="section-title">📦 Invest Packs</div>
     <div class="package-grid" id="packageGrid"></div>
 
     <div class="referral-box">
-        <h4> Refer & Earn</h4>
-        <p>Share your referral code and get 200 when they join!</p>
+        <h4>🤝 Refer & Earn</h4>
+        <p>Share your referral code and get ₹200 when they join!</p>
         <div class="referral-code" id="referralCode">+91 98765 43210</div>
-        <button class="copy-btn" onclick="copyReferral()"> Copy Referral Code</button>
+        <button class="copy-btn" onclick="copyReferral()">📋 Copy Referral Code</button>
     </div>
 
-    <div class="section-title" style="margin-top:18px; font-size:16px;"> Activity</div>
+    <div class="section-title" style="margin-top:18px; font-size:16px;">📜 Activity</div>
     <div class="history" id="historyList"></div>
-    <div class="footnote"> Secured � UPI � Daily returns auto-credit</div>
+    <div class="footnote">🔒 Secured • UPI • Daily returns auto-credit</div>
 </div>
 
 <!-- Bottom Navigation -->
 <div class="bottom-nav">
     <a href="dashboard.html" class="nav-item active" id="navHome">
-        <span class="icon"></span> Home
+        <span class="icon">🏠</span> Home
     </a>
     <a href="#invest" class="nav-item" onclick="document.getElementById('packageGrid').scrollIntoView({behavior:'smooth'});">
-        <span class="icon"></span> Invest
+        <span class="icon">📦</span> Invest
     </a>
     <a href="#refer" class="nav-item" onclick="document.querySelector('.referral-box').scrollIntoView({behavior:'smooth'});">
-        <span class="icon"></span> Refer
+        <span class="icon">🤝</span> Refer
     </a>
     <a href="settings.html" class="nav-item" id="navSettings">
-        <span class="icon"></span> Settings
+        <span class="icon">⚙️</span> Settings
     </a>
 </div>
 
-<!-- UPI Modal & Loading (same) -->
+<!-- UPI Modal & Loading -->
 <div class="upi-modal" id="upiModal">
     <div class="modal-box">
-        <h3> Select UPI App</h3>
+        <h3>💳 Select UPI App</h3>
         <p>Choose your installed app to pay.</p>
         <div class="upi-options">
-            <button onclick="selectApp('phonepe')"> PhonePe</button>
-            <button onclick="selectApp('gpay')"> Google Pay</button>
-            <button onclick="selectApp('paytm')"> Paytm</button>
+            <button onclick="selectApp('phonepe')">📱 PhonePe</button>
+            <button onclick="selectApp('gpay')">📱 Google Pay</button>
+            <button onclick="selectApp('paytm')">📱 Paytm</button>
         </div>
         <button class="cancel-btn" onclick="closeModal()">Cancel</button>
     </div>
@@ -169,7 +168,7 @@
 
 <script>
     // ================================================================
-    //  CHANGE THIS � YOUR UPI ID (money goes here)
+    // 🔥 CHANGE THIS – YOUR UPI ID (money goes here)
     const MY_UPI = "yourname@paytm";
     // ================================================================
     const TARGET = 2100;
@@ -180,10 +179,10 @@
     const PACKAGES = [
         { amount: 500, daily: 30, name: 'Basic', badge: '' },
         { amount: 1000, daily: 60, name: 'Standard', badge: '' },
-        { amount: 1500, daily: 100, name: 'Premium', badge: ' Popular' },
-        { amount: 3000, daily: 200, name: 'Elite', badge: ' Best' },
-        { amount: 5000, daily: 400, name: 'Gold', badge: ' Top' },
-        { amount: 10000, daily: 1000, name: 'Diamond', badge: ' VIP' }
+        { amount: 1500, daily: 100, name: 'Premium', badge: '🔥 Popular' },
+        { amount: 3000, daily: 200, name: 'Elite', badge: '⭐ Best' },
+        { amount: 5000, daily: 400, name: 'Gold', badge: '💎 Top' },
+        { amount: 10000, daily: 1000, name: 'Diamond', badge: '👑 VIP' }
     ];
 
     function renderPackages() {
@@ -197,10 +196,10 @@
             item.innerHTML = `
                 ${badgeHtml}
                 <div class="package-info">
-                    <div class="name">${pkg.amount}</div>
-                    <div class="desc">Daily ${pkg.daily}</div>
+                    <div class="name">₹${pkg.amount}</div>
+                    <div class="desc">Daily ₹${pkg.daily}</div>
                 </div>
-                <div class="package-return">+${pkg.daily} <span style="font-weight:400;color:#8f9bb3;">/day</span></div>
+                <div class="package-return">+₹${pkg.daily} <span style="font-weight:400;color:#8f9bb3;">/day</span></div>
             `;
             grid.appendChild(item);
         });
@@ -244,7 +243,7 @@
                 hist.appendChild(d);
             });
         } else {
-            hist.innerHTML = '<div class="history-item"><span>No activity yet</span><span>�</span></div>';
+            hist.innerHTML = '<div class="history-item"><span>No activity yet</span><span>—</span></div>';
         }
     }
 
@@ -259,17 +258,17 @@
         const hint = document.getElementById('withdrawHint');
         const canWithdraw = currentUser.balance >= TARGET;
         btn.disabled = !canWithdraw;
-        btn.innerText = canWithdraw ? ' Withdraw 2,100 Now' : ' Withdraw Now';
-        hint.innerText = canWithdraw ? ' You can withdraw now!' : 'Requires 2,100 balance';
+        btn.innerText = canWithdraw ? '💸 Withdraw ₹2,100 Now' : '💸 Withdraw Now';
+        hint.innerText = canWithdraw ? '✅ You can withdraw now!' : 'Requires ₹2,100 balance';
         hint.style.color = canWithdraw ? '#28a745' : '#5a6488';
-        document.getElementById('totalInvested').innerText = '' + (currentUser.totalInvested || 0);
-        document.getElementById('totalEarnings').innerText = '' + (currentUser.totalEarnings || 0);
+        document.getElementById('totalInvested').innerText = '₹' + (currentUser.totalInvested || 0);
+        document.getElementById('totalEarnings').innerText = '₹' + (currentUser.totalEarnings || 0);
     }
 
     function addHistory(text, amount) {
         if (!currentUser) return;
         if (!currentUser.history) currentUser.history = [];
-        currentUser.history.unshift(`${text} +${amount}`);
+        currentUser.history.unshift(`${text} +₹${amount}`);
         if (currentUser.history.length > 12) currentUser.history.pop();
         saveUser();
         renderHistory();
@@ -296,13 +295,13 @@
                 currentUser.balance += action.amount;
                 currentUser.dailyReturn += action.dailyReturn;
                 currentUser.totalInvested = (currentUser.totalInvested || 0) + action.amount;
-                addHistory(`Invest ${action.amount} (${action.name})`, action.amount);
-                alert(` Investment successful! +${action.amount}. Daily return ${action.dailyReturn} started.`);
+                addHistory(`Invest ₹${action.amount} (${action.name})`, action.amount);
+                alert(`✅ Investment successful! +₹${action.amount}. Daily return ₹${action.dailyReturn} started.`);
             } else if (action.type === 'withdraw') {
                 if (currentUser.balance >= TARGET) {
                     currentUser.balance -= TARGET;
-                    addHistory(`Withdraw ${TARGET}`, TARGET);
-                    alert(` Withdrawal request sent! ${TARGET} will be credited to your UPI.`);
+                    addHistory(`Withdraw ₹${TARGET}`, TARGET);
+                    alert(`✅ Withdrawal request sent! ₹${TARGET} will be credited to your UPI.`);
                 }
             }
             localStorage.removeItem('wealthvault_pending');
@@ -322,7 +321,7 @@
     function initWithdraw() {
         if (!currentUser) return;
         if (currentUser.balance < TARGET) {
-            alert(`Minimum withdrawal is ${TARGET}. You have ${currentUser.balance.toFixed(2)}.`);
+            alert(`Minimum withdrawal is ₹${TARGET}. You have ₹${currentUser.balance.toFixed(2)}.`);
             return;
         }
         pendingAction = { type: 'withdraw' };
@@ -357,12 +356,12 @@
         const code = document.getElementById('referralCode').innerText;
         if (navigator.clipboard) {
             navigator.clipboard.writeText(code).then(() => {
-                alert(' Referral code copied! Share it to earn 200 per join.');
+                alert('✅ Referral code copied! Share it to earn ₹200 per join.');
             }).catch(() => {
-                alert(' Copy this code manually: ' + code);
+                alert('📋 Copy this code manually: ' + code);
             });
         } else {
-            alert(' Copy this code manually: ' + code);
+            alert('📋 Copy this code manually: ' + code);
         }
     }
 
