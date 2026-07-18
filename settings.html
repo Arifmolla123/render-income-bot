@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Settings – WealthVault</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <title>Settings  WealthVault</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',-apple-system,sans-serif; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; }
         body { background:#0b0e1a; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:16px; }
         .container { max-width:400px; width:100%; background:#13172a; border-radius:40px; padding:30px 24px; border:1px solid #2a2f4a; }
         .back-link { color:#a8b2d1; text-decoration:none; display:inline-block; margin-bottom:20px; font-size:14px; }
@@ -20,57 +22,97 @@
         .field input:focus { border-color:#f5b041; }
         .btn-save { width:100%; padding:16px; border:none; border-radius:60px; background:linear-gradient(135deg,#f5b041,#f7c948); color:#0b0e1a; font-weight:700; font-size:18px; cursor:pointer; }
         .btn-save:active { transform:scale(0.96); }
+        .btn-save:disabled { opacity:0.6; }
         .message { color:#28a745; font-size:14px; text-align:center; margin-top:12px; }
         .error-msg { color:#e74c3c; font-size:14px; text-align:center; margin-top:8px; }
     </style>
 </head>
 <body>
 <div class="container">
-    <a href="dashboard.html" class="back-link">⬅ Back to Dashboard</a>
-    <h1>⚙️ <span>Settings</span></h1>
+    <a href="dashboard.html" class="back-link"> Back to Dashboard</a>
+    <h1> <span>Settings</span></h1>
     <div class="field">
-        <label>👤 Full Name</label>
+        <label> Full Name</label>
         <input type="text" id="editName" placeholder="Your name">
     </div>
     <div class="field">
-        <label>📱 Phone Number</label>
-        <div class="value" id="displayPhone">+91 98765 43210</div>
+        <label> Phone Number</label>
+        <div class="value" id="displayPhone">Loading...</div>
         <div style="font-size:12px; color:#5a6488; margin-top:4px;">Phone cannot be changed</div>
     </div>
     <div class="field">
-        <label>🔒 PIN (4 digits)</label>
-        <input type="password" id="editPin" placeholder="New 4-digit PIN" maxlength="4" inputmode="numeric">
+        <label> New Password (min 6 chars)</label>
+        <input type="password" id="editPassword" placeholder="New password" minlength="6">
+        <div style="font-size:12px; color:#5a6488; margin-top:4px;">Leave blank to keep current password</div>
     </div>
-    <button class="btn-save" onclick="saveSettings()">💾 Save Changes</button>
+    <button class="btn-save" id="saveBtn" onclick="saveSettings()"> Save Changes</button>
     <div id="msg" class="message"></div>
     <div id="err" class="error-msg"></div>
 </div>
 <script>
-    function loadSettings() {
-        const session = localStorage.getItem('wealthvault_session');
-        if (!session) { window.location.href = 'login.html'; return; }
-        const users = JSON.parse(localStorage.getItem('wealthvault_users')) || {};
-        if (!users[session]) { localStorage.removeItem('wealthvault_session'); window.location.href = 'login.html'; return; }
-        document.getElementById('editName').value = users[session].name || '';
-        document.getElementById('displayPhone').innerText = users[session].phone || '';
-    }
-    function saveSettings() {
-        const session = localStorage.getItem('wealthvault_session');
-        if (!session) { window.location.href = 'login.html'; return; }
-        const users = JSON.parse(localStorage.getItem('wealthvault_users')) || {};
-        if (!users[session]) { localStorage.removeItem('wealthvault_session'); window.location.href = 'login.html'; return; }
+    const firebaseConfig = {
+        apiKey: "AIzaSyAkq_YqX9N7j3b-_GK_7O7FcT-3RZfakH8",
+        authDomain: "earn-app-3d66d.firebaseapp.com",
+        databaseURL: "https://earn-app-3d66d-default-rtdb.firebaseio.com",
+        projectId: "earn-app-3d66d",
+        storageBucket: "earn-app-3d66d.firebasestorage.app",
+        messagingSenderId: "411398449895",
+        appId: "1:411398449895:web:aff196fcc3c0b1669e9042",
+        measurementId: "G-RS4F95THHY"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+    let currentUid = null;
+
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            currentUid = user.uid;
+            db.ref('users/' + user.uid).once('value').then((snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    document.getElementById('editName').value = data.name || '';
+                    document.getElementById('displayPhone').innerText = data.phone || 'N/A';
+                }
+            });
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
+
+    async function saveSettings() {
         const newName = document.getElementById('editName').value.trim();
-        const newPin = document.getElementById('editPin').value.trim();
-        if (!newName) { document.getElementById('err').innerText = 'Name cannot be empty.'; document.getElementById('msg').innerText = ''; return; }
-        if (newPin && newPin.length !== 4) { document.getElementById('err').innerText = 'PIN must be 4 digits.'; document.getElementById('msg').innerText = ''; return; }
-        users[session].name = newName;
-        if (newPin) users[session].pin = newPin;
-        localStorage.setItem('wealthvault_users', JSON.stringify(users));
-        document.getElementById('err').innerText = '';
-        document.getElementById('msg').innerText = '✅ Settings updated!';
-        setTimeout(() => document.getElementById('msg').innerText = '', 3000);
+        const newPassword = document.getElementById('editPassword').value.trim();
+
+        if (!newName) {
+            document.getElementById('err').innerText = 'Name cannot be empty.';
+            document.getElementById('msg').innerText = '';
+            return;
+        }
+
+        const btn = document.getElementById('saveBtn');
+        btn.disabled = true;
+        btn.innerText = 'Saving...';
+
+        try {
+            await db.ref('users/' + currentUid).update({ name: newName });
+
+            if (newPassword.length >= 6) {
+                await auth.currentUser.updatePassword(newPassword);
+            }
+
+            document.getElementById('err').innerText = '';
+            document.getElementById('msg').innerText = ' Settings updated successfully!';
+            setTimeout(() => document.getElementById('msg').innerText = '', 3000);
+
+        } catch (error) {
+            document.getElementById('err').innerText = error.message;
+        } finally {
+            btn.disabled = false;
+            btn.innerText = ' Save Changes';
+        }
     }
-    window.onload = loadSettings;
 </script>
 </body>
 </html>

@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>WealthVault – Dashboard</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family:system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; }
         body { background:#0b0e1a; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:16px; }
         .app { max-width:420px; width:100%; background:#13172a; border-radius:40px; padding:20px 18px 30px; border:1px solid #2a2f4a; box-shadow:0 20px 60px rgba(0,0,0,0.6); padding-bottom:80px; }
-        /* Top Nav */
         .nav { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
         .nav-left { display:flex; align-items:center; gap:12px; }
         .avatar { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#f5b041,#f7c948); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px; color:#0b0e1a; }
@@ -19,7 +21,6 @@
         .nav-icon:active { color:#f5b041; }
         .welcome { color:#a8b2d1; font-size:14px; margin-bottom:16px; }
         .welcome strong { color:#fff; }
-        /* Balance Card */
         .balance-card { background:linear-gradient(145deg,#1e2442,#2a3158); border-radius:32px; padding:22px 20px; margin-bottom:16px; border:1px solid #3b436a; }
         .balance-label { color:#a8b2d1; font-size:14px; font-weight:500; }
         .balance-amount { font-size:44px; font-weight:700; color:#fff; margin:4px 0 8px; }
@@ -60,13 +61,11 @@
         .history-item .time { color:#5a6488; font-size:11px; }
         .history-item:last-child { border-bottom:none; }
         .footnote { text-align:center; font-size:12px; color:#4a5478; margin-top:18px; }
-        /* Bottom Navigation */
         .bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:420px; background:#13172a; border-top:1px solid #2a2f4a; display:flex; justify-content:space-around; padding:10px 0 14px; border-radius:40px 40px 0 0; z-index:100; }
         .nav-item { display:flex; flex-direction:column; align-items:center; color:#5a6488; text-decoration:none; font-size:12px; transition:0.2s; cursor:pointer; }
         .nav-item.active { color:#f5b041; }
         .nav-item .icon { font-size:22px; margin-bottom:2px; }
         .nav-item:active { transform:scale(0.9); }
-        /* Modal & Loading */
         .upi-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center; z-index:1000; backdrop-filter:blur(6px); }
         .modal-box { background:#1a1f38; padding:30px 24px; border-radius:40px; max-width:360px; width:100%; border:1px solid #2a3158; text-align:center; }
         .modal-box h3 { color:#fff; font-size:20px; }
@@ -85,7 +84,6 @@
 </head>
 <body>
 <div class="app" id="dashboard">
-    <!-- Top Nav -->
     <div class="nav">
         <div class="nav-left">
             <div class="avatar" id="avatarLetter">W</div>
@@ -95,7 +93,6 @@
             <span class="nav-icon" onclick="logout()" style="cursor:pointer;">🚪</span>
         </div>
     </div>
-
     <div class="welcome">👋 Welcome, <strong id="userName">User</strong>!</div>
 
     <div class="balance-card">
@@ -121,11 +118,10 @@
     <div class="section-title">📦 Invest Packs</div>
     <div class="package-grid" id="packageGrid"></div>
 
-    <!-- Referral Section with LINK -->
     <div class="referral-box">
         <h4>🤝 Refer & Earn</h4>
         <p>Share your referral link and get ₹200 when they join!</p>
-        <div class="referral-link-box" id="referralLinkDisplay">https://yourdomain.com/login.html?ref=...</div>
+        <div class="referral-link-box" id="referralLinkDisplay">Loading...</div>
         <button class="copy-btn" onclick="copyReferral()">📋 Copy Referral Link</button>
     </div>
 
@@ -134,23 +130,13 @@
     <div class="footnote">🔒 Secured • UPI • Daily returns auto-credit</div>
 </div>
 
-<!-- Bottom Navigation -->
 <div class="bottom-nav">
-    <a href="dashboard.html" class="nav-item active" id="navHome">
-        <span class="icon">🏠</span> Home
-    </a>
-    <a href="#invest" class="nav-item" onclick="document.getElementById('packageGrid').scrollIntoView({behavior:'smooth'});">
-        <span class="icon">📦</span> Invest
-    </a>
-    <a href="#refer" class="nav-item" onclick="document.querySelector('.referral-box').scrollIntoView({behavior:'smooth'});">
-        <span class="icon">🤝</span> Refer
-    </a>
-    <a href="settings.html" class="nav-item" id="navSettings">
-        <span class="icon">⚙️</span> Settings
-    </a>
+    <a href="dashboard.html" class="nav-item active"><span class="icon">🏠</span> Home</a>
+    <a href="#invest" class="nav-item" onclick="document.getElementById('packageGrid').scrollIntoView({behavior:'smooth'});"><span class="icon">📦</span> Invest</a>
+    <a href="#refer" class="nav-item" onclick="document.querySelector('.referral-box').scrollIntoView({behavior:'smooth'});"><span class="icon">🤝</span> Refer</a>
+    <a href="settings.html" class="nav-item"><span class="icon">⚙️</span> Settings</a>
 </div>
 
-<!-- UPI Modal & Loading -->
 <div class="upi-modal" id="upiModal">
     <div class="modal-box">
         <h3>💳 Select UPI App</h3>
@@ -169,11 +155,26 @@
 
 <script>
     // ================================================================
-    // 🔥 CHANGE THIS – YOUR UPI ID (money goes here)
-    const MY_UPI = "yourname@paytm";
+    const firebaseConfig = {
+        apiKey: "AIzaSyAkq_YqX9N7j3b-_GK_7O7FcT-3RZfakH8",
+        authDomain: "earn-app-3d66d.firebaseapp.com",
+        databaseURL: "https://earn-app-3d66d-default-rtdb.firebaseio.com",
+        projectId: "earn-app-3d66d",
+        storageBucket: "earn-app-3d66d.firebasestorage.app",
+        messagingSenderId: "411398449895",
+        appId: "1:411398449895:web:aff196fcc3c0b1669e9042",
+        measurementId: "G-RS4F95THHY"
+    };
+    const MY_UPI = "yourname@paytm"; // ⚠️ আপনার UPI দিন
     // ================================================================
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
     const TARGET = 2100;
     let currentUser = null;
+    let userRef = null;
     let pendingAction = null;
     let returnInterval = null;
 
@@ -206,131 +207,148 @@
         });
     }
 
-    function loadUser() {
-        const session = localStorage.getItem('wealthvault_session');
-        if (!session) { window.location.href = 'login.html'; return; }
-        const users = JSON.parse(localStorage.getItem('wealthvault_users')) || {};
-        if (!users[session]) { localStorage.removeItem('wealthvault_session'); window.location.href = 'login.html'; return; }
-        currentUser = users[session];
-        if (currentUser.totalInvested === undefined) currentUser.totalInvested = 0;
-        if (currentUser.totalEarnings === undefined) currentUser.totalEarnings = 0;
-        document.getElementById('userName').innerText = currentUser.name;
-        document.getElementById('avatarLetter').innerText = currentUser.name.charAt(0).toUpperCase();
-
-        // Set Referral LINK (not just number)
-        const origin = window.location.origin;
-        const refLink = `${origin}/login.html?ref=${currentUser.phone}`;
-        document.getElementById('referralLinkDisplay').innerText = refLink;
-
-        renderHistory();
-        updateUI();
-        startDailyReturn();
-        checkPending();
-        renderPackages();
-    }
-
-    function saveUser() {
-        if (!currentUser) return;
-        const users = JSON.parse(localStorage.getItem('wealthvault_users')) || {};
-        users[currentUser.phone] = currentUser;
-        localStorage.setItem('wealthvault_users', JSON.stringify(users));
-    }
-
-    function renderHistory() {
-        const hist = document.getElementById('historyList');
-        hist.innerHTML = '';
-        if (currentUser.history && currentUser.history.length) {
-            currentUser.history.forEach(entry => {
-                const d = document.createElement('div');
-                d.className = 'history-item';
-                const time = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
-                d.innerHTML = `<span>${entry}</span><span class="time">${time}</span>`;
-                hist.appendChild(d);
-            });
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            currentUser = user;
+            userRef = db.ref('users/' + user.uid);
+            loadUserData();
+            renderPackages();
+            startDailyReturn();
+            checkPending();
         } else {
-            hist.innerHTML = '<div class="history-item"><span>No activity yet</span><span>—</span></div>';
+            window.location.href = 'login.html';
         }
-    }
+    });
 
-    function updateUI() {
-        if (!currentUser) return;
-        document.getElementById('balance').innerText = currentUser.balance.toFixed(2);
-        document.getElementById('dailyReturn').innerText = currentUser.dailyReturn;
-        let pct = (currentUser.balance / TARGET) * 100;
-        if (pct > 100) pct = 100;
-        document.getElementById('progressBar').style.width = pct + '%';
-        const btn = document.getElementById('withdrawBtn');
-        const hint = document.getElementById('withdrawHint');
-        const canWithdraw = currentUser.balance >= TARGET;
-        btn.disabled = !canWithdraw;
-        btn.innerText = canWithdraw ? '💸 Withdraw ₹2,100 Now' : '💸 Withdraw Now';
-        hint.innerText = canWithdraw ? '✅ You can withdraw now!' : 'Requires ₹2,100 balance';
-        hint.style.color = canWithdraw ? '#28a745' : '#5a6488';
-        document.getElementById('totalInvested').innerText = '₹' + (currentUser.totalInvested || 0);
-        document.getElementById('totalEarnings').innerText = '₹' + (currentUser.totalEarnings || 0);
-    }
+    function loadUserData() {
+        userRef.on('value', (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                document.getElementById('userName').innerText = data.name || 'User';
+                document.getElementById('avatarLetter').innerText = (data.name || 'U').charAt(0).toUpperCase();
 
-    function addHistory(text, amount) {
-        if (!currentUser) return;
-        if (!currentUser.history) currentUser.history = [];
-        currentUser.history.unshift(`${text} +₹${amount}`);
-        if (currentUser.history.length > 12) currentUser.history.pop();
-        saveUser();
-        renderHistory();
+                const balance = data.balance || 0;
+                const dailyReturn = data.dailyReturn || 0;
+                const totalInvested = data.totalInvested || 0;
+                const totalEarnings = data.totalEarnings || 0;
+                const history = data.history || [];
+
+                document.getElementById('balance').innerText = balance.toFixed(2);
+                document.getElementById('dailyReturn').innerText = dailyReturn;
+                document.getElementById('totalInvested').innerText = '₹' + totalInvested;
+                document.getElementById('totalEarnings').innerText = '₹' + totalEarnings;
+
+                let pct = (balance / TARGET) * 100;
+                if (pct > 100) pct = 100;
+                document.getElementById('progressBar').style.width = pct + '%';
+
+                const btn = document.getElementById('withdrawBtn');
+                const hint = document.getElementById('withdrawHint');
+                const canWithdraw = balance >= TARGET;
+                btn.disabled = !canWithdraw;
+                btn.innerText = canWithdraw ? '💸 Withdraw ₹2,100 Now' : '💸 Withdraw Now';
+                hint.innerText = canWithdraw ? '✅ You can withdraw now!' : 'Requires ₹2,100 balance';
+                hint.style.color = canWithdraw ? '#28a745' : '#5a6488';
+
+                const hist = document.getElementById('historyList');
+                hist.innerHTML = '';
+                if (history && history.length) {
+                    history.forEach(entry => {
+                        const d = document.createElement('div');
+                        d.className = 'history-item';
+                        const time = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+                        d.innerHTML = `<span>${entry}</span><span class="time">${time}</span>`;
+                        hist.appendChild(d);
+                    });
+                } else {
+                    hist.innerHTML = '<div class="history-item"><span>No activity yet</span><span>—</span></div>';
+                }
+
+                const origin = window.location.origin;
+                const phone = data.phone || '';
+                const refLink = `${origin}/login.html?ref=${phone}`;
+                document.getElementById('referralLinkDisplay').innerText = refLink;
+
+                window._userData = data;
+            }
+        }, (error) => {
+            console.error("Error loading user data:", error);
+        });
     }
 
     function startDailyReturn() {
         if (returnInterval) clearInterval(returnInterval);
         returnInterval = setInterval(() => {
-            if (!currentUser || currentUser.dailyReturn <= 0) return;
-            const perSec = currentUser.dailyReturn / 86400;
-            const increment = perSec * 10;
-            currentUser.balance += increment;
-            currentUser.totalEarnings = (currentUser.totalEarnings || 0) + increment;
-            updateUI();
-            saveUser();
+            if (!userRef) return;
+            userRef.transaction((currentData) => {
+                if (currentData === null) return currentData;
+                const dailyReturn = currentData.dailyReturn || 0;
+                if (dailyReturn <= 0) return currentData;
+                const perSec = dailyReturn / 86400;
+                const increment = perSec * 10;
+                currentData.balance = (currentData.balance || 0) + increment;
+                currentData.totalEarnings = (currentData.totalEarnings || 0) + increment;
+                return currentData;
+            });
         }, 10000);
     }
 
     function checkPending() {
         const pending = localStorage.getItem('wealthvault_pending');
-        if (pending && currentUser) {
+        if (pending && userRef) {
             const action = JSON.parse(pending);
-            if (action.type === 'invest') {
-                currentUser.balance += action.amount;
-                currentUser.dailyReturn += action.dailyReturn;
-                currentUser.totalInvested = (currentUser.totalInvested || 0) + action.amount;
-                addHistory(`Invest ₹${action.amount} (${action.name})`, action.amount);
-                alert(`✅ Investment successful! +₹${action.amount}. Daily return ₹${action.dailyReturn} started.`);
-            } else if (action.type === 'withdraw') {
-                if (currentUser.balance >= TARGET) {
-                    currentUser.balance -= TARGET;
-                    addHistory(`Withdraw ₹${TARGET}`, TARGET);
-                    alert(`✅ Withdrawal request sent! ₹${TARGET} will be credited to your UPI.`);
+            userRef.transaction((currentData) => {
+                if (currentData === null) return currentData;
+                if (action.type === 'invest') {
+                    currentData.balance = (currentData.balance || 0) + action.amount;
+                    currentData.dailyReturn = (currentData.dailyReturn || 0) + action.dailyReturn;
+                    currentData.totalInvested = (currentData.totalInvested || 0) + action.amount;
+                    if (!currentData.history) currentData.history = [];
+                    currentData.history.unshift(`Invest ₹${action.amount} (${action.name}) +₹${action.amount}`);
+                    alert(`✅ Investment successful! +₹${action.amount}. Daily return ₹${action.dailyReturn} started.`);
+                } else if (action.type === 'withdraw') {
+                    if ((currentData.balance || 0) >= TARGET) {
+                        currentData.balance = (currentData.balance || 0) - TARGET;
+                        if (!currentData.history) currentData.history = [];
+                        currentData.history.unshift(`Withdraw ₹${TARGET} -₹${TARGET}`);
+                        alert(`✅ Withdrawal request sent! ₹${TARGET} will be credited to your UPI.`);
+                    }
                 }
-            }
+                return currentData;
+            });
             localStorage.removeItem('wealthvault_pending');
-            updateUI();
-            saveUser();
         }
         document.getElementById('loadingOverlay').style.display = 'none';
     }
 
     function initInvest(amount, dailyReturn, name) {
-        if (!currentUser) return;
-        if (currentUser.balance >= TARGET) { alert('You already reached withdrawal limit. Please withdraw first.'); return; }
-        pendingAction = { type: 'invest', amount, dailyReturn, name };
-        document.getElementById('upiModal').style.display = 'flex';
+        if (!userRef) return;
+        userRef.once('value', (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                if (data.balance >= TARGET) {
+                    alert('You already reached withdrawal limit. Please withdraw first.');
+                    return;
+                }
+                pendingAction = { type: 'invest', amount, dailyReturn, name };
+                document.getElementById('upiModal').style.display = 'flex';
+            }
+        });
     }
 
     function initWithdraw() {
-        if (!currentUser) return;
-        if (currentUser.balance < TARGET) {
-            alert(`Minimum withdrawal is ₹${TARGET}. You have ₹${currentUser.balance.toFixed(2)}.`);
-            return;
-        }
-        pendingAction = { type: 'withdraw' };
-        document.getElementById('upiModal').style.display = 'flex';
+        if (!userRef) return;
+        userRef.once('value', (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                if (data.balance < TARGET) {
+                    alert(`Minimum withdrawal is ₹${TARGET}. You have ₹${data.balance.toFixed(2)}.`);
+                    return;
+                }
+                pendingAction = { type: 'withdraw' };
+                document.getElementById('upiModal').style.display = 'flex';
+            }
+        });
     }
 
     function closeModal() {
@@ -339,7 +357,7 @@
     }
 
     function selectApp(app) {
-        if (!pendingAction || !currentUser) return;
+        if (!pendingAction) return;
         closeModal();
         const isInvest = pendingAction.type === 'invest';
         const amount = isInvest ? pendingAction.amount : TARGET;
@@ -352,7 +370,6 @@
             default: alert('Invalid selection.'); return;
         }
         localStorage.setItem('wealthvault_pending', JSON.stringify(pendingAction));
-        saveUser();
         document.getElementById('loadingOverlay').style.display = 'flex';
         setTimeout(() => { window.location.href = url; }, 600);
     }
@@ -371,14 +388,10 @@
     }
 
     function logout() {
-        localStorage.removeItem('wealthvault_session');
-        window.location.href = 'login.html';
+        auth.signOut().then(() => {
+            window.location.href = 'login.html';
+        });
     }
-
-    window.onload = loadUser;
-    window.onclick = function(e) {
-        if (e.target === document.getElementById('upiModal')) closeModal();
-    };
 </script>
 </body>
 </html>
