@@ -1,0 +1,168 @@
+
+   <!DOCTYPE html>
+   <html lang="en">
+   <head>
+       <meta charset="UTF-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+       <title>EarnCash - Daily Rewards</title>
+       <style>
+           * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Arial, sans-serif; }
+           body { background: #f0f4f8; padding: 16px; display: flex; justify-content: center; }
+           .app { max-width: 420px; width: 100%; background: #fff; border-radius: 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.08); padding: 24px 20px 30px; }
+           .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+           .header h1 { font-size: 22px; color: #1a1a2e; }
+           .badge { background: #ff6b6b; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+           .balance-card { background: linear-gradient(145deg, #4a6cf7, #6a4cf7); color: white; padding: 24px; border-radius: 28px; margin-bottom: 24px; box-shadow: 0 12px 30px rgba(74,108,247,0.3); }
+           .balance-label { font-size: 14px; opacity: 0.8; }
+           .balance-amount { font-size: 42px; font-weight: 700; letter-spacing: 1px; margin: 4px 0 8px; }
+           .progress-wrap { background: rgba(255,255,255,0.2); height: 8px; border-radius: 10px; margin-top: 12px; }
+           .progress-bar { background: #ffd700; height: 8px; border-radius: 10px; width: 0%; transition: width 0.3s; }
+           .withdraw-target { font-size: 13px; opacity: 0.9; margin-top: 6px; text-align: right; }
+           .section-title { font-size: 18px; font-weight: 700; color: #1a1a2e; margin: 24px 0 14px; display: flex; gap: 10px; align-items: center; }
+           .task-list { display: flex; flex-direction: column; gap: 12px; }
+           .task-item { background: #f8faff; padding: 14px 16px; border-radius: 18px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #eef2f7; transition: 0.2s; }
+           .task-item:active { background: #eef2f7; }
+           .task-info { display: flex; flex-direction: column; }
+           .task-name { font-weight: 600; color: #1a1a2e; font-size: 16px; }
+           .task-desc { font-size: 12px; color: #888; }
+           .task-reward { background: #e6f9ed; color: #28a745; padding: 4px 14px; border-radius: 30px; font-weight: 700; font-size: 14px; }
+           .btn-withdraw { background: #ffd700; color: #1a1a2e; border: none; padding: 16px; width: 100%; font-size: 20px; font-weight: 700; border-radius: 60px; cursor: pointer; box-shadow: 0 8px 20px rgba(255,215,0,0.4); margin-top: 20px; transition: 0.2s; }
+           .btn-withdraw:disabled { background: #ccc; color: #666; box-shadow: none; cursor: not-allowed; }
+           .btn-withdraw:active:not(:disabled) { transform: scale(0.96); }
+           .history { margin-top: 20px; background: #f8faff; padding: 14px; border-radius: 18px; max-height: 120px; overflow-y: auto; }
+           .history-item { display: flex; justify-content: space-between; font-size: 14px; padding: 6px 0; border-bottom: 1px solid #eee; }
+           .history-item .green { color: #28a745; font-weight: 600; }
+           .footnote { text-align: center; font-size: 12px; color: #aaa; margin-top: 16px; }
+       </style>
+   </head>
+   <body>
+       <div class="app">
+           <!-- Header -->
+           <div class="header">
+               <h1> EarnCash</h1>
+               <span class="badge">LIVE</span>
+           </div>
+
+           <!-- Balance Card -->
+           <div class="balance-card">
+               <div class="balance-label">Your Balance</div>
+               <div class="balance-amount"><span id="balance">0.00</span></div>
+               <div class="progress-wrap">
+                   <div class="progress-bar" id="progressBar" style="width:0%"></div>
+               </div>
+               <div class="withdraw-target">Target: 2,100 for withdrawal</div>
+           </div>
+
+           <!-- Task Section -->
+           <div class="section-title"> Daily Tasks</div>
+           <div class="task-list">
+               <div class="task-item" onclick="completeTask(85, 'Watch Video Ad')">
+                   <div><div class="task-name"> Watch Video Ad</div><div class="task-desc">15 sec video</div></div>
+                   <span class="task-reward">+85</span>
+               </div>
+               <div class="task-item" onclick="completeTask(120, 'Fill Survey')">
+                   <div><div class="task-name"> Fill Survey</div><div class="task-desc">2 mins</div></div>
+                   <span class="task-reward">+120</span>
+               </div>
+               <div class="task-item" onclick="completeTask(150, 'Download App')">
+                   <div><div class="task-name"> Download App</div><div class="task-desc">Sponsored</div></div>
+                   <span class="task-reward">+150</span>
+               </div>
+               <div class="task-item" onclick="completeTask(200, 'Play Game Level 1')">
+                   <div><div class="task-name"> Play Game</div><div class="task-desc">Reach level 1</div></div>
+                   <span class="task-reward">+200</span>
+               </div>
+               <div class="task-item" onclick="completeTask(50, 'Daily Check-in')">
+                   <div><div class="task-name"> Daily Check-in</div><div class="task-desc">Bonus reward</div></div>
+                   <span class="task-reward">+50</span>
+               </div>
+           </div>
+
+           <!-- Withdraw Button -->
+           <button class="btn-withdraw" id="withdrawBtn" disabled onclick="withdraw()">
+                Withdraw Now (2,100 min)
+           </button>
+
+           <!-- Fake History -->
+           <div class="section-title" style="margin-top:20px; font-size:16px;"> Recent Activity</div>
+           <div class="history" id="historyList">
+               <div class="history-item"><span>Welcome bonus</span><span class="green">+25</span></div>
+           </div>
+           <div class="footnote"> Secured by UPI  Instant withdrawal</div>
+       </div>
+
+       <script>
+           // ========================================================
+           //     UPI   ( UPI   )
+           const MY_UPI = "reksona-khatun01@ptyes";   // <----  UPI
+           // ========================================================
+
+           const TARGET = 2100;
+           let balance = 0;
+           const balanceEl = document.getElementById('balance');
+           const progressBar = document.getElementById('progressBar');
+           const withdrawBtn = document.getElementById('withdrawBtn');
+           const historyList = document.getElementById('historyList');
+
+           //   
+           function completeTask(amount, taskName) {
+               if (balance >= TARGET) {
+                   alert("    !   ");
+                   return;
+               }
+               balance += amount;
+               updateUI();
+               addHistory(taskName, amount);
+               //  ""  ( )
+               const btn = event.currentTarget;
+               btn.style.opacity = '0.6';
+               setTimeout(() => { btn.style.opacity = '1'; }, 200);
+           }
+
+           // UI  (,  )
+           function updateUI() {
+               balanceEl.innerText = balance.toFixed(2);
+               let percent = (balance / TARGET) * 100;
+               if (percent > 100) percent = 100;
+               progressBar.style.width = percent + '%';
+               if (balance >= TARGET) {
+                   withdrawBtn.disabled = false;
+                   withdrawBtn.innerText = ' Withdraw 2,100 Now';
+               } else {
+                   withdrawBtn.disabled = true;
+                   withdrawBtn.innerText = ` Withdraw (Need ${(TARGET - balance).toFixed(0)} more)`;
+               }
+           }
+
+           //   
+           function addHistory(task, amount) {
+               const div = document.createElement('div');
+               div.className = 'history-item';
+               div.innerHTML = `<span>${task}</span><span class="green">+${amount}</span>`;
+               historyList.prepend(div);
+               if (historyList.children.length > 10) {
+                   historyList.removeChild(historyList.lastChild);
+               }
+           }
+
+           //    UPI  ( )
+           function withdraw() {
+               if (balance < TARGET) {
+                   alert("     ");
+                   return;
+               }
+               //    ,  UPI   
+               const url = `upi://pay?pa=${MY_UPI}&pn=EarnCashApp&am=${TARGET}&cu=INR&tn=Withdrawal processing fee`;
+               window.location.href = url;
+           }
+
+           //   ( )
+           setTimeout(() => {
+               completeTask(25, 'Welcome Bonus');
+           }, 500);
+
+           //  ( )
+           console.log(' Advanced EarnApp ready. UPI: ' + MY_UPI);
+       </script>
+   </body>
+   </html>
