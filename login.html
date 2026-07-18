@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WealthVault – Login</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+        body { background:#0b0e1a; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:16px; }
+        .container { max-width:400px; width:100%; background:#13172a; border-radius:36px; padding:30px 24px; border:1px solid #2a2f4a; }
+        h1 { text-align:center; color:#fff; font-size:32px; }
+        h1 span { color:#f5b041; }
+        p.sub { text-align:center; color:#8f9bb3; margin-bottom:30px; }
+        .input-group { margin-bottom:16px; }
+        .input-group label { color:#a8b2d1; font-size:13px; display:block; margin-bottom:4px; }
+        .input-group input { width:100%; padding:14px 16px; border-radius:60px; border:1px solid #2a3158; background:#1a1f38; color:#fff; font-size:16px; outline:none; }
+        .input-group input:focus { border-color:#f5b041; }
+        .btn { width:100%; padding:16px; border:none; border-radius:60px; background:linear-gradient(135deg,#f5b041,#f7c948); color:#0b0e1a; font-weight:700; font-size:18px; cursor:pointer; margin-top:8px; }
+        .btn:active { transform:scale(0.96); }
+        .toggle { text-align:center; color:#8f9bb3; margin-top:16px; font-size:14px; }
+        .toggle a { color:#f5b041; font-weight:600; cursor:pointer; }
+        .error { color:#e74c3c; font-size:13px; text-align:center; min-height:22px; margin-top:8px; }
+        .small-hint { color:#5a6488; font-size:12px; margin-top:2px; }
+    </style>
+</head>
+<body>
+<div class="container" id="app">
+    <h1>💎 <span>Wealth</span>Vault</h1>
+    <p class="sub">Invest & earn daily</p>
+
+    <!-- Login Form -->
+    <div id="loginForm">
+        <div class="input-group"><label>📱 Phone</label><input type="text" id="loginPhone" placeholder="Phone number"></div>
+        <div class="input-group"><label>🔒 PIN (4 digits)</label><input type="password" id="loginPin" placeholder="4-digit PIN" maxlength="4" inputmode="numeric"></div>
+        <button class="btn" onclick="login()">🔑 Login</button>
+        <div class="toggle">New user? <a onclick="showReg()">Create Account</a></div>
+        <div class="error" id="loginError"></div>
+    </div>
+
+    <!-- Register Form (with Referrer) -->
+    <div id="registerForm" style="display:none;">
+        <div class="input-group"><label>👤 Full Name</label><input type="text" id="regName" placeholder="Your name"></div>
+        <div class="input-group"><label>📱 Phone</label><input type="text" id="regPhone" placeholder="Phone number"></div>
+        <div class="input-group"><label>🔒 Set PIN (4 digits)</label><input type="password" id="regPin" placeholder="Create PIN" maxlength="4" inputmode="numeric"></div>
+        <div class="input-group"><label>🤝 Referrer Phone (optional)</label>
+            <input type="text" id="regReferrer" placeholder="Referrer's phone number">
+            <div class="small-hint">You both get ₹200 bonus!</div>
+        </div>
+        <button class="btn" onclick="register()">📝 Register</button>
+        <div class="toggle">Already have account? <a onclick="showLogin()">Login</a></div>
+        <div class="error" id="regError"></div>
+    </div>
+</div>
+
+<script>
+    // -------------------- AUTH + REFERRAL LOGIC --------------------
+    function getUsers() { return JSON.parse(localStorage.getItem('wealthvault_users')) || {}; }
+    function saveUsers(u) { localStorage.setItem('wealthvault_users', JSON.stringify(u)); }
+    function setSession(p) { localStorage.setItem('wealthvault_session', p); }
+
+    function showReg() {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('registerForm').style.display = 'block';
+        document.getElementById('loginError').innerText = '';
+        document.getElementById('regError').innerText = '';
+    }
+    function showLogin() {
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('registerForm').style.display = 'none';
+        document.getElementById('loginError').innerText = '';
+        document.getElementById('regError').innerText = '';
+    }
+
+    function register() {
+        const name = document.getElementById('regName').value.trim();
+        const phone = document.getElementById('regPhone').value.trim();
+        const pin = document.getElementById('regPin').value.trim();
+        const referrerPhone = document.getElementById('regReferrer').value.trim();
+
+        if (!name || !phone || pin.length !== 4) {
+            document.getElementById('regError').innerText = 'Fill all fields & use 4-digit PIN.';
+            return;
+        }
+        const users = getUsers();
+        if (users[phone]) {
+            document.getElementById('regError').innerText = 'Phone already registered.';
+            return;
+        }
+
+        // Create new user
+        users[phone] = {
+            name, phone, pin,
+            balance: 25,  // welcome bonus
+            dailyReturn: 0,
+            history: ['🎁 Welcome bonus +₹25'],
+            referredBy: referrerPhone || null
+        };
+
+        // If referrer exists and is not self, give ₹200 bonus to referrer
+        if (referrerPhone && referrerPhone !== phone && users[referrerPhone]) {
+            users[referrerPhone].balance = (users[referrerPhone].balance || 0) + 200;
+            if (!users[referrerPhone].history) users[referrerPhone].history = [];
+            users[referrerPhone].history.unshift(`🤝 Referral bonus +₹200 (from ${phone})`);
+            // save referrer's update
+        }
+
+        saveUsers(users);
+        setSession(phone);
+        window.location.href = 'dashboard.html';
+    }
+
+    function login() {
+        const phone = document.getElementById('loginPhone').value.trim();
+        const pin = document.getElementById('loginPin').value.trim();
+        if (!phone || pin.length !== 4) {
+            document.getElementById('loginError').innerText = 'Enter valid phone & 4-digit PIN.';
+            return;
+        }
+        const users = getUsers();
+        if (!users[phone] || users[phone].pin !== pin) {
+            document.getElementById('loginError').innerText = 'Invalid phone or PIN.';
+            return;
+        }
+        setSession(phone);
+        window.location.href = 'dashboard.html';
+    }
+
+    // Auto-redirect if already logged in
+    if (localStorage.getItem('wealthvault_session')) {
+        window.location.href = 'dashboard.html';
+    }
+</script>
+</body>
+</html>
