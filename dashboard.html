@@ -264,10 +264,14 @@
                     hist.innerHTML = '<div class="history-item"><span>No activity yet</span><span>—</span></div>';
                 }
 
-                const origin = window.location.origin;
-                const phone = data.phone || '';
-                const refLink = `${origin}/login.html?ref=${phone}`;
-                document.getElementById('referralLinkDisplay').innerText = refLink;
+                // dashboard.html-এর JavaScript-এ এই অংশটি Replace করুন:
+
+// রেফার লিংক তৈরি (সঠিক পাথ সহ)
+// dashboard.html-এর JavaScript-এ রেফার লিংক তৈরির অংশ:
+const origin = window.location.origin;
+const basePath = window.location.pathname.includes('render-income-bot') ? '/render-income-bot' : '';
+const refLink = `${origin}${basePath}/login.html?ref=${currentUser.phone}`;
+document.getElementById('referralLinkDisplay').innerText = refLink;
 
                 window._userData = data;
             }

@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WealthVault  Login</title>
-    <!-- Firebase SDKs -->
+    <title>WealthVault – Login</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -36,18 +35,15 @@
 </head>
 <body>
 <div class="container" id="app">
-    <h1> <span>Wealth</span>Vault</h1>
+    <h1>💎 <span>Wealth</span>Vault</h1>
     <p class="sub">Invest & earn daily</p>
 
     <!-- Login Form -->
     <div id="loginForm">
-        <div class="input-group"><label> Phone</label><input type="text" id="loginPhone" placeholder="Enter phone number"></div>
-        <div class="input-group"><label> Password</label><input type="password" id="loginPassword" placeholder="Your password"></div>
-        <button class="btn" id="loginBtn" onclick="login()"> Login</button>
-        
+        <div class="input-group"><label>📱 Phone</label><input type="text" id="loginPhone" placeholder="Enter phone number"></div>
+        <div class="input-group"><label>🔒 Password</label><input type="password" id="loginPassword" placeholder="Your password"></div>
+        <button class="btn" id="loginBtn" onclick="login()">🔑 Login</button>
         <div class="divider"><span>OR</span></div>
-        
-        <!-- Google Sign-In Button -->
         <button class="btn btn-google" onclick="googleLogin()">
             <svg viewBox="0 0 24 24" width="24" height="24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -57,34 +53,31 @@
             </svg>
             Sign in with Google
         </button>
-
         <div class="toggle">New user? <a onclick="showReg()">Create Account</a></div>
         <div class="error" id="loginError"></div>
     </div>
 
-    <!-- Register Form (Email/Password) -->
+    <!-- Register Form -->
     <div id="registerForm" style="display:none;">
-        <div class="input-group"><label> Full Name</label><input type="text" id="regName" placeholder="Your full name"></div>
-        <div class="input-group"><label> Phone</label><input type="text" id="regPhone" placeholder="Phone number"></div>
+        <div class="input-group"><label>👤 Full Name</label><input type="text" id="regName" placeholder="Your full name"></div>
+        <div class="input-group"><label>📱 Phone</label><input type="text" id="regPhone" placeholder="Phone number"></div>
         <div class="input-group">
-            <label> Password (min 6 chars)</label>
+            <label>🔒 Password (min 6 chars)</label>
             <input type="password" id="regPassword" placeholder="Create a strong password" minlength="6">
             <div class="pass-rule">Use letters, numbers & special characters</div>
         </div>
         <div class="input-group">
-            <label> Referrer Phone (optional)</label>
-            <input type="text" id="regReferrer" placeholder="Referrer's phone number">
-            <div class="small-hint">You both get 200 bonus!</div>
+            <label>🤝 Referrer Phone (optional)</label>
+            <input type="text" id="regReferrer" placeholder="Referrer's phone number" readonly style="background:#1a1f38;opacity:0.7;">
+            <div class="small-hint">Auto-filled from referral link</div>
         </div>
-        <button class="btn" id="regBtn" onclick="register()"> Register</button>
+        <button class="btn" id="regBtn" onclick="register()">📝 Register</button>
         <div class="toggle">Already have account? <a onclick="showLogin()">Login</a></div>
         <div class="error" id="regError"></div>
     </div>
 </div>
 
 <script>
-    // ================================================================
-    //  Firebase Config ( )
     const firebaseConfig = {
         apiKey: "AIzaSyAkq_YqX9N7j3b-_GK_7O7FcT-3RZfakH8",
         authDomain: "earn-app-3d66d.firebaseapp.com",
@@ -95,11 +88,20 @@
         appId: "1:411398449895:web:aff196fcc3c0b1669e9042",
         measurementId: "G-RS4F95THHY"
     };
-    // ================================================================
 
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
+
+    // ---------- রেফারার অটো-ফিল (URL থেকে) ----------
+    (function() {
+        const params = new URLSearchParams(window.location.search);
+        const ref = params.get('ref');
+        if (ref) {
+            const field = document.getElementById('regReferrer');
+            if (field) field.value = ref;
+        }
+    })();
 
     // ---------- Google Login ----------
     async function googleLogin() {
@@ -107,23 +109,40 @@
         try {
             const result = await auth.signInWithPopup(provider);
             const user = result.user;
-            // Check if user exists in DB, if not create
             const snapshot = await db.ref('users/' + user.uid).once('value');
             if (!snapshot.exists()) {
-                // New user  create profile with phone from email (or placeholder)
                 const email = user.email || '';
                 const phone = email.split('@')[0] || 'N/A';
                 const name = user.displayName || 'Google User';
+                const params = new URLSearchParams(window.location.search);
+                const referrerPhone = params.get('ref') || null;
+                
                 await db.ref('users/' + user.uid).set({
                     name: name,
                     phone: phone,
-                    balance: 25,
+                    balance: 35,   // ✅ ওয়েলকাম বোনাস ৩৫
                     dailyReturn: 0,
                     totalInvested: 0,
                     totalEarnings: 0,
-                    history: [' Welcome bonus +25'],
+                    history: ['🎁 Welcome bonus +₹35'],
+                    referredBy: referrerPhone || null,
                     createdAt: Date.now()
                 });
+
+                if (referrerPhone && referrerPhone !== phone) {
+                    const snapshot2 = await db.ref('users').orderByChild('phone').equalTo(referrerPhone).once('value');
+                    if (snapshot2.exists()) {
+                        const refKey = Object.keys(snapshot2.val())[0];
+                        const refData = snapshot2.val()[refKey];
+                        const newBalance = (refData.balance || 0) + 200;
+                        const newHistory = refData.history || [];
+                        newHistory.unshift(`🤝 Referral bonus +₹200 (from ${phone})`);
+                        await db.ref('users/' + refKey).update({
+                            balance: newBalance,
+                            history: newHistory
+                        });
+                    }
+                }
             }
             window.location.href = 'dashboard.html';
         } catch (error) {
@@ -152,11 +171,11 @@
         } catch (error) {
             document.getElementById('loginError').innerText = error.message;
             btn.disabled = false;
-            btn.innerText = ' Login';
+            btn.innerText = '🔑 Login';
         }
     }
 
-    // ---------- Register (Email/Password) ----------
+    // ---------- Register ----------
     async function register() {
         const name = document.getElementById('regName').value.trim();
         const phone = document.getElementById('regPhone').value.trim();
@@ -182,17 +201,16 @@
             const userData = {
                 name: name,
                 phone: phone,
-                balance: 25,
+                balance: 35,   // ✅ ওয়েলকাম বোনাস ৩৫
                 dailyReturn: 0,
                 totalInvested: 0,
                 totalEarnings: 0,
-                history: [' Welcome bonus +25'],
+                history: ['🎁 Welcome bonus +₹35'],
                 referredBy: referrerPhone || null,
                 createdAt: Date.now()
             };
             await db.ref('users/' + uid).set(userData);
 
-            // Give referrer bonus
             if (referrerPhone && referrerPhone !== phone) {
                 const snapshot = await db.ref('users').orderByChild('phone').equalTo(referrerPhone).once('value');
                 if (snapshot.exists()) {
@@ -200,7 +218,7 @@
                     const refData = snapshot.val()[refKey];
                     const newBalance = (refData.balance || 0) + 200;
                     const newHistory = refData.history || [];
-                    newHistory.unshift(` Referral bonus +200 (from ${phone})`);
+                    newHistory.unshift(`🤝 Referral bonus +₹200 (from ${phone})`);
                     await db.ref('users/' + refKey).update({
                         balance: newBalance,
                         history: newHistory
@@ -213,11 +231,10 @@
         } catch (error) {
             document.getElementById('regError').innerText = error.message;
             btn.disabled = false;
-            btn.innerText = ' Register';
+            btn.innerText = '📝 Register';
         }
     }
 
-    // ---------- UI Helpers ----------
     function showReg() {
         document.getElementById('loginForm').style.display = 'none';
         document.getElementById('registerForm').style.display = 'block';
@@ -234,20 +251,9 @@
         document.getElementById('regError').innerText = '';
     }
 
-    // Auto-redirect if already logged in
     auth.onAuthStateChanged((user) => {
         if (user) window.location.href = 'dashboard.html';
     });
-
-    // Auto-fill referrer from URL
-    (function() {
-        const params = new URLSearchParams(window.location.search);
-        const ref = params.get('ref');
-        if (ref) {
-            const field = document.getElementById('regReferrer');
-            if (field) field.value = ref;
-        }
-    })();
 </script>
 </body>
 </html>
