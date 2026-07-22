@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Settings  WealthVault</title>
+    <title>Settings – WealthVault</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -29,23 +29,23 @@
 </head>
 <body>
 <div class="container">
-    <a href="dashboard.html" class="back-link"> Back to Dashboard</a>
-    <h1> <span>Settings</span></h1>
+    <a href="dashboard.html" class="back-link">⬅ Back to Dashboard</a>
+    <h1>⚙️ <span>Settings</span></h1>
     <div class="field">
-        <label> Full Name</label>
+        <label>👤 Full Name</label>
         <input type="text" id="editName" placeholder="Your name">
     </div>
     <div class="field">
-        <label> Phone Number</label>
+        <label>📱 Phone Number</label>
         <div class="value" id="displayPhone">Loading...</div>
         <div style="font-size:12px; color:#5a6488; margin-top:4px;">Phone cannot be changed</div>
     </div>
     <div class="field">
-        <label> New Password (min 6 chars)</label>
+        <label>🔒 New Password (min 6 chars)</label>
         <input type="password" id="editPassword" placeholder="New password" minlength="6">
         <div style="font-size:12px; color:#5a6488; margin-top:4px;">Leave blank to keep current password</div>
     </div>
-    <button class="btn-save" id="saveBtn" onclick="saveSettings()"> Save Changes</button>
+    <button class="btn-save" id="saveBtn" onclick="saveSettings()">💾 Save Changes</button>
     <div id="msg" class="message"></div>
     <div id="err" class="error-msg"></div>
 </div>
@@ -103,14 +103,14 @@
             }
 
             document.getElementById('err').innerText = '';
-            document.getElementById('msg').innerText = ' Settings updated successfully!';
+            document.getElementById('msg').innerText = '✅ Settings updated successfully!';
             setTimeout(() => document.getElementById('msg').innerText = '', 3000);
 
         } catch (error) {
             document.getElementById('err').innerText = error.message;
         } finally {
             btn.disabled = false;
-            btn.innerText = ' Save Changes';
+            btn.innerText = '💾 Save Changes';
         }
     }
 </script>

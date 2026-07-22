@@ -8,6 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <style>
+        /* আপনার আগের CSS ঠিক রাখুন – আমি শুধু JS পরিবর্তন করছি */
         * { margin:0; padding:0; box-sizing:border-box; font-family:system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; }
         body { background:#0b0e1a; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:16px; }
         .app { max-width:420px; width:100%; background:#13172a; border-radius:40px; padding:20px 18px 30px; border:1px solid #2a2f4a; box-shadow:0 20px 60px rgba(0,0,0,0.6); padding-bottom:80px; }
@@ -224,9 +225,11 @@
         userRef.on('value', (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
+                // ইউজারের নাম আপডেট
                 document.getElementById('userName').innerText = data.name || 'User';
                 document.getElementById('avatarLetter').innerText = (data.name || 'U').charAt(0).toUpperCase();
 
+                // ব্যালেন্স ও অন্যান্য ডেটা
                 const balance = data.balance || 0;
                 const dailyReturn = data.dailyReturn || 0;
                 const totalInvested = data.totalInvested || 0;
@@ -250,6 +253,7 @@
                 hint.innerText = canWithdraw ? '✅ You can withdraw now!' : 'Requires ₹2,100 balance';
                 hint.style.color = canWithdraw ? '#28a745' : '#5a6488';
 
+                // হিস্টরি রেন্ডার
                 const hist = document.getElementById('historyList');
                 hist.innerHTML = '';
                 if (history && history.length) {
@@ -264,16 +268,19 @@
                     hist.innerHTML = '<div class="history-item"><span>No activity yet</span><span>—</span></div>';
                 }
 
-                // dashboard.html-এর JavaScript-এ এই অংশটি Replace করুন:
-
-
-// ড্যাশবোর্ডের JavaScript-এ রেফার লিংক তৈরির অংশ
+                // ---------- রেফার লিংক তৈরি (ঠিক করা) ----------
+     // ---------- রেফার লিংক তৈরি (সঠিক পাথ সহ) ----------
 const origin = window.location.origin;
-// যেহেতু আপনার ফাইল render-income-bot ফোল্ডারে, তাই পাথটা সেট করুন
-const basePath = '/render-income-bot';  // যদি রুটে থাকে, তাহলে '' দিন
-const refLink = `${origin}${basePath}/login.html?ref=${currentUser.phone}`;
+// যেহেতু আপনার ফাইল render-income-bot ফোল্ডারে, তাই basePath সেট করুন
+const basePath = '/render-income-bot';
+const phone = data.phone || '';
+const refLink = `${origin}${basePath}/login.html?ref=${phone}`;
 document.getElementById('referralLinkDisplay').innerText = refLink;
+
                 window._userData = data;
+            } else {
+                // যদি ডেটা না থাকে (নতুন ইউজার কিন্তু ডেটা তৈরি হয়নি) – তখন কিছু করি না
+                console.warn('User data not found in DB.');
             }
         }, (error) => {
             console.error("Error loading user data:", error);
@@ -296,8 +303,7 @@ document.getElementById('referralLinkDisplay').innerText = refLink;
             });
         }, 10000);
     }
-
-    function checkPending() {
+   function checkPending() {
         const pending = localStorage.getItem('wealthvault_pending');
         if (pending && userRef) {
             const action = JSON.parse(pending);
@@ -399,3 +405,4 @@ document.getElementById('referralLinkDisplay').innerText = refLink;
 </script>
 </body>
 </html>
+ 
