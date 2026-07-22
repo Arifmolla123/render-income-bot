@@ -266,10 +266,11 @@
 
                 // dashboard.html-এর JavaScript-এ এই অংশটি Replace করুন:
 
-// রেফার লিংক তৈরি (সঠিক পাথ সহ)
 
+// ড্যাশবোর্ডের JavaScript-এ রেফার লিংক তৈরির অংশ
 const origin = window.location.origin;
-const basePath = window.location.pathname.includes('render-income-bot') ? '/render-income-bot' : '';
+// যেহেতু আপনার ফাইল render-income-bot ফোল্ডারে, তাই পাথটা সেট করুন
+const basePath = '/render-income-bot';  // যদি রুটে থাকে, তাহলে '' দিন
 const refLink = `${origin}${basePath}/login.html?ref=${currentUser.phone}`;
 document.getElementById('referralLinkDisplay').innerText = refLink;
                 window._userData = data;
